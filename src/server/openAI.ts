@@ -1,23 +1,49 @@
 import OpenAI from "openai";
-import { MacrosRequestBody } from "./models.js";
+import { MacrosRequestBody, MealPlan } from "./models.js";
 
-export async function getDiet({protein, carbs, fat}: MacrosRequestBody) {
+export async function getDiet({protein, carbs, fat}: MacrosRequestBody): Promise<MealPlan> {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    const prompt =
-        `Generate a meal plan in JSON format with the following macronutrient targets:
-        - Protein: ${protein}g
-        - Carbs: ${carbs}g
-        - Fat: ${fat}g
+    const prompt =    
+        `You are a nutritionist tasked with creating a precise meal plan for a client using specified macronutrient targets.
 
-        The JSON structure should include the following:
-        - Each meal (Breakfast, Lunch, Snack, Dinner) with the food items, measurements for each item, and macronutrient breakdown (protein, carbs, fat, and calories).
-        - A "daily_totals" section that sums up the total protein, carbs, fat, and calories for the entire day.
+        **Objective**: Generate a meal plan that exactly meets the given macronutrient targets using standard measurements (e.g., grams, ounces).
 
-        The meals and food items should be selected to precisely meet the given macronutrient targets as closely as possible. Use realistic and commonly available food portions and measurements (e.g., in grams, cups, tablespoons).
+        **Targets**:
+        - Protein: ${protein} grams
+        - Carbs: ${carbs} grams
+        - Fat: ${fat} grams
 
-        Return only the JSON output with no additional explanation.
-        `;
+        **Instructions**:
+        - Use the provided variables for protein, carbs, and fat to fill in the targets.
+        - Structure your response precisely according to the specified JSON format.
+        - Do not include any additional text or explanations outside the JSON format.
+
+        **JSON Schema**:
+        \`\`\`json
+        {
+            "mealPlan": [
+                {
+                    "meal": "Breakfast",
+                    "foods": [
+                        {
+                            "name": "Food 1",
+                            "protein": 0,
+                            "carbs": 0,
+                            "fat": 0
+                        }
+                    ]
+                }
+            ],
+            "totalMacronutrients": {
+                "protein": 0,
+                "carbs": 0,
+                "fat": 0
+            }
+        }
+        \`\`\
+
+        Remember to ensure that the sum of the macronutrients in the meal plan exactly matches the provided targets for protein, carbs, and fat. `;
 
     const response = await openai.chat.completions.create({
         model: "gpt-4o",

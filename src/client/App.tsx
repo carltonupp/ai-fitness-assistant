@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import MealPlanView from "./MealPlanView";
 
 function App() {
 
@@ -48,10 +49,7 @@ function App() {
         <button type="submit">Submit</button>
       </form>
 
-      {diet && <div className="diet">
-        <h2>Your Meal Plan</h2>
-        <pre>{JSON.stringify(diet, null, 2)}</pre>
-      </div>}
+      {diet && <MealPlanView plan={diet} />}
     </div>
   );
 }

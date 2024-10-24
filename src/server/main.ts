@@ -13,9 +13,9 @@ app.use(express.json())
 app.post("/get-diet", async (req, res) => {
   const macros = req.body as MacrosRequestBody;
   
-  const resp = await getDiet(macros);
+  const mealPlan = await getDiet(macros);
 
-  res.json(resp);
+  res.json(mealPlan);
 });
 
 ViteExpress.listen(app, 3000, () =>
