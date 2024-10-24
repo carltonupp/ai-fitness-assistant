@@ -2,14 +2,45 @@ import OpenAI from "openai";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function getDiet(protein: number, carbs: number, fats: number) {
+
+    const prompt =
+        `Generate a meal plan in JSON format with the following macronutrient targets:
+        - Protein: ${protein}g
+        - Carbs: ${carbs}g
+        - Fat: ${fats}g
+
+        The JSON structure should include the following:
+        - Each meal (Breakfast, Lunch, Snack, Dinner) with the food items, measurements for each item, and macronutrient breakdown (protein, carbs, fat, and calories).
+        - A "daily_totals" section that sums up the total protein, carbs, fat, and calories for the entire day.
+
+        The meals and food items should be selected to precisely meet the given macronutrient targets as closely as possible. Use realistic and commonly available food portions and measurements (e.g., in grams, cups, tablespoons).
+
+        Return only the JSON output with no additional explanation.
+        `;
+
     const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
             {
                 role: "system",
-                content: `Create a diet plan for somebody with the following macronutrient targets: ${protein}g Protein, ${carbs}g Carbs, ${fats}g Fat and show the macronutrient breakdown of each meal, in a json format`
+                content: prompt,
             }],
-        });
+    });
 
-    return response.choices[0].message.content;
+    const answer = response.choices[0].message.content;
+
+    if (!answer) {
+        throw new Error("No response from OpenAI");
+    }
+
+    const regex = /```json([\s\S]*?)```/;
+    const match = answer.match(regex);
+
+    if (!match) {
+        throw new Error("No JSON output found in response");
+    }
+
+    const jsonContent = match[1].trim();
+
+    retyrb JSON.parse(jsonContent);
 }
